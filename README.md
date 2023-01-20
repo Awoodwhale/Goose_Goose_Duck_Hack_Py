@@ -7,6 +7,12 @@
 >
 > 内存操作使用[pymem](https://github.com/srounet/Pymem)，GUI界面使用[pywebview](https://github.com/r0x0r/pywebview)。
 
+## Use Directly
+
+下载最新发行版本，双击Goose_Goose_Duck_Hack_Py.exe运行GUI程序。
+
+或者使用命令行cmd进行命令行输入，例如`Goose_Goose_Duck_Hack_Py.exe --help`
+
 ## Install
 
 ```sh
