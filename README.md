@@ -7,11 +7,20 @@
 >
 > 内存操作使用[pymem](https://github.com/srounet/Pymem)，GUI界面使用[pywebview](https://github.com/r0x0r/pywebview)。
 
+## Before All
+
+本项目**仅用来学习**，若对本项目进行滥用，作者本人不会对此负责！
+
+在此感谢[Liuhaixv](https://github.com/Liuhaixv)的项目[Liuhaixv's Goose_Goose_Duck_Hack](https://github.com/Liuhaixv/Goose_Goose_Duck_Hack/)，本项目是基于该项目的c++代码编写的Python版本。
+
+
 ## Use Directly
 
 下载最新发行版本，双击Goose_Goose_Duck_Hack_Py.exe运行GUI程序。
 
 或者使用命令行cmd进行命令行输入，例如`Goose_Goose_Duck_Hack_Py.exe --help`
+
+若不想使用打包好的发行版本也可以使用下面的方式进行安装并在本地运行👇
 
 ## Install
 
