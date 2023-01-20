@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="zh-ch">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Goose Goose Duck Players Info</title>
+    <link rel="stylesheet" href="./layui/css/layui.css">
+    <link rel="stylesheet" href="./css/style.css">
+</head>
+
+<body>
+    <script src="./layui/layui.js"></script>
+    <script src="./js/main.js"></script>
+    <div style="width:100%">
+        <div class="layui-row layui-col-space5" style="padding: 5px 5px;padding-bottom: 0;">
+            <div class="layui-col-xs3">
+                <div class="layui-panel">
+                    <div style="padding: 15px;" id="player0">玩家1</div>
+                </div>
+            </div>
+
+            <div class="layui-col-xs3">
+                <div class="layui-panel">
+                    <div style="padding: 15px;" id="player1">玩家2</div>
+                </div>
+            </div>
+
+            <div class="layui-col-xs3">
+                <div class="layui-panel">
+                    <div style="padding: 15px;" id="player2">玩家3</div>
+                </div>
+            </div>
+
+            <div class="layui-col-xs3">
+                <div class="layui-panel">
+                    <div style="padding: 15px;" id="player3">玩家4</div>
+                </div>
+            </div>
+        </div>
+        <div class="layui-row layui-col-space5" style="padding: 5px 5px;padding-bottom: 0;">
+            <div class="layui-col-xs3">
+                <div class="layui-panel">
+                    <div style="padding: 15px;" id="player4">玩家5</div>
+                </div>
+            </div>
+
+            <div class="layui-col-xs3">
+                <div class="layui-panel">
+                    <div style="padding: 15px;" id="player5">玩家6</div>
+                </div>
+            </div>
+
+            <div class="layui-col-xs3">
+                <div class="layui-panel">
+                    <div style="padding: 15px;" id="player6">玩家7</div>
+                </div>
+            </div>
+
+            <div class="layui-col-xs3">
+                <div class="layui-panel">
+                    <div style="padding: 15px;" id="player7">玩家8</div>
+                </div>
+            </div>
+        </div>
+        <div class="layui-row layui-col-space5" style="padding: 5px 5px;padding-bottom: 0;">
+            <div class="layui-col-xs3">
+                <div class="layui-panel">
+                    <div style="padding: 15px;" id="player8">玩家9</div>
+                </div>
+            </div>
+
+            <div class="layui-col-xs3">
+                <div class="layui-panel">
+                    <div style="padding: 15px;" id="player9">玩家10</div>
+                </div>
+            </div>
+
+            <div class="layui-col-xs3">
+                <div class="layui-panel">
+                    <div style="padding: 15px;" id="player10">玩家11</div>
+                </div>
+            </div>
+
+            <div class="layui-col-xs3">
+                <div class="layui-panel">
+                    <div style="padding: 15px;" id="player11">玩家12</div>
+                </div>
+            </div>
+        </div>
+        <div class="layui-row layui-col-space5" style="padding: 5px 5px;padding-bottom: 0;">
+            <div class="layui-col-xs3">
+                <div class="layui-panel">
+                    <div style="padding: 15px;" id="player12">玩家13</div>
+                </div>
+            </div>
+
+            <div class="layui-col-xs3">
+                <div class="layui-panel">
+                    <div style="padding: 15px;" id="player13">玩家14</div>
+                </div>
+            </div>
+
+            <div class="layui-col-xs3">
+                <div class="layui-panel">
+                    <div style="padding: 15px;" id="player14">玩家15</div>
+                </div>
+            </div>
+
+            <div class="layui-col-xs3">
+                <div class="layui-panel">
+                    <div style="padding: 15px;" id="player15">玩家16</div>
+                </div>
+            </div>
+        </div>
+
+        <script>
+            const $ = layui.$
+            let update_player_info_interval = undefined
+            const update_player_info = () => {
+                parent.api.get_players_info().then((infos) => {
+                    for (let i = 0; i < infos.length; i++) {
+                        const info = infos[i]
+                        if (info === "{}") continue
+                        const json_info = JSON.parse(info)
+                        const nickname = json_info["nickname"]
+                        // nickname为空就跳过
+                        if (nickname === "") continue
+                        $("#player" + i).html(`<div style='font-size:15px;font-weight:bold'>${nickname}<div/><br/>
+                        已被禁音:${json_info["b_isSilenced"]}<br/>
+                        已被感染:${json_info["b_isInfected"]}<br/>
+                        钻管道中:${json_info["b_inVent"]}<br/>
+                        携带炸弹:${json_info["b_hasBomb"]}<br/>
+                        本轮杀人:${json_info["b_hasKilledThisRound"]}<br/>
+                        当前角色:${json_info["rolename"]}<br/>
+                        观战状态:${json_info["b_isSpectator"]}<br/>
+                        鬼魂状态:${json_info["b_isGhost"]}`)
+                    }
+                }).catch(() => {
+                    parent.api.is_game_process_open().then((res) => {
+                        if (!res) {
+                            if (update_player_info_interval !== undefined) {
+                                console.log("游戏被关闭了, 关闭玩家信息更新触发器");
+                                clearInterval(update_player_info_interval)
+                            }
+                            $("#refresh").click()   // 执行刷新
+                        }
+                    })
+                })
+            }
+
+            const init_player_info = async () => {
+                const ready = await parent.api.is_game_process_open()
+                if (!ready) {
+                    game_not_start()
+                    return
+                }
+                update_player_info()
+                if (update_player_info_interval === undefined) {
+                    update_player_info_interval = setInterval(update_player_info, 1000)
+                }
+            }
+
+            init_player_info()
+
+        </script>
+
+</body>
+
+</html>

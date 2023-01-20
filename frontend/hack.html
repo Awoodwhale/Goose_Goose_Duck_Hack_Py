@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="zh-ch">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Goose Goose Duck Hack</title>
+    <link rel="stylesheet" href="./layui/css/layui.css">
+    <link rel="stylesheet" href="./css/style.css">
+</head>
+
+<body>
+    <script src="./layui/layui.js"></script>
+    <script src="./js/main.js"></script>
+
+    <div class="layui-collapse">
+        <div class="layui-colla-item">
+            <h2 class="layui-colla-title">速度修改</h2>
+            <div class="layui-colla-content layui-show">
+
+                <div class="layui-panel">
+                    <div style="padding: 20px;">
+                        <div style="margin-bottom:20px">
+                            <div>当前速度 : <span id="cur_speed">5</span></div>
+
+                            <div>目标速度 : <span id="target_speed">5</span></div>
+
+                        </div>
+                        <div id="slide_bar"></div>
+                        <div style="margin-top:25px">
+                            <button type="button" id="hack_speed_btn" class="layui-btn layui-btn-sm">确认修改</button>
+                            <button type="button" id="hack_speed_recover_btn"
+                                class="layui-btn layui-btn-normal layui-btn-sm">还原默认</button>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+        <div class="layui-colla-item">
+            <h2 class="layui-colla-title">状态修改</h2>
+            <div class="layui-colla-content layui-show">
+                <div class="layui-panel">
+                    <div style="padding:0 20px;padding-top: 10px;">
+                        <div>
+                            <div>
+                                <label class="layui-form-label" style="width:60px;padding-left: 0;">穿墙状态</label>
+                                <input id="wall" style="margin:9px 0" type="checkbox"
+                                    class="check-switch check-switch-anim" />
+                            </div>
+                            <div>
+                                <label class="layui-form-label" style="width:60px;padding-left: 0;">技能冷却</label>
+                                <input id="cd" style="margin:9px 0" type="checkbox"
+                                    class="check-switch check-switch-anim" />
+                            </div>
+
+                            <div>
+                                <label class="layui-form-label" style="width:60px;padding-left: 0;">移除迷雾</label>
+                                <input id="fog" style="margin:9px 0" type="checkbox"
+                                    class="check-switch check-switch-anim" />
+
+                            </div>
+                            <div style="margin-bottom: 20px;">
+                                <button type="button" id="recover_all"
+                                    class="layui-btn layui-btn-normal layui-btn-sm">一键还原所有初始状态</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const $ = layui.$
+        const state = {
+            cd: false,
+            fog: false,
+            wall: false,
+        }
+        layui.use(['element', 'slider'], () => {
+            const element = layui.element
+            const slider = layui.slider
+            slider.render({
+                elem: '#slide_bar',
+                input: true,
+                value: 5,
+                change: (value) => {
+                    $("#target_speed").html(value)
+                }
+            })
+        });
+
+        const init_func = async () => {
+            const ready = await parent.api.is_game_process_open()
+            if (ready) {
+                await parent.api.update_players()   // 更新一次用户状态
+                parent.api.get_cur_speed().then((res) => {
+                    $("#cur_speed").html("" + res)
+                })
+                parent.api.get_cur_enable_wall().then((res) => {
+                    $("#wall").attr("checked", res)
+                    state.wall = res
+                })
+                parent.api.get_cur_enable_xray().then((res) => {
+                    $("#fog").attr("checked", res)
+                    state.fog = res
+                })
+                parent.api.get_cur_enable_cd().then((res) => {
+                    $("#cd").attr("checked", res)
+                    state.cd = res
+                })
+            }
+
+            $("#hack_speed_btn").on("click", () => {
+                if (!ready) {
+                    game_not_start()
+                    return
+                }
+                parent.api.hack_speed(parseFloat($("#target_speed").html())).then((res) => {
+                    messageplugin({
+                        message: res ? "修改速度成功" : "修改速度失败",
+                        type: res ? "success" : "error"
+                    })
+                    parent.api.get_cur_speed().then((res) => {
+                        $("#cur_speed").html("" + res)
+                        $("#target_speed").html("" + res)
+                    })
+                })
+            })
+
+            $("#hack_speed_recover_btn").on("click", () => {
+                if (!ready) {
+                    game_not_start()
+                    return
+                }
+                parent.api.hack_speed(5.0).then((res) => {
+                    messageplugin({
+                        message: res ? "重制速度成功" : "重制速度失败",
+                        type: res ? "success" : "error"
+                    })
+                    $("#cur_speed").html("5")
+                })
+            })
+
+            $("#recover_all").on("click", () => {
+                if (state.wall) {
+                    $("#wall").click()
+                }
+                if (state.cd) {
+                    $("#cd").click()
+                }
+                if (state.fog) {
+                    $("#fog").click()
+                }
+            })
+
+            $("#wall").change(() => {
+                if (!ready) {
+                    game_not_start()
+                    $("#wall").attr("checked", state.wall)
+                    return
+                }
+                parent.api.hack_wall(!state.wall).then((res) => {
+                    const str = !state.wall ? "开启" : "关闭"
+                    messageplugin({
+                        message: res ? str + "穿墙成功" : str + "穿墙失败",
+                        type: res ? "success" : "error"
+                    })
+                    if (res) {
+                        state.wall = !state.wall
+                    } else {
+                        $("#wall").attr("checked", state.wall)
+                    }
+                })
+            })
+
+            $("#fog").change(() => {
+                if (!ready) {
+                    game_not_start()
+                    $("#fog").attr("checked", state.fog)
+                    return
+                }
+                parent.api.hack_fog(!state.fog).then((res) => {
+                    const str = !state.fog ? "开启" : "关闭"
+                    messageplugin({
+                        message: res ? str + "透视成功" : str + "透视失败",
+                        type: res ? "success" : "error"
+                    })
+                    if (res) {
+                        state.fog = !state.fog
+                    } else {
+                        $("#fog").attr("checked", state.fog)
+                    }
+                })
+            })
+
+            $("#cd").change(() => {
+                if (!ready) {
+                    game_not_start()
+                    $("#cd").attr("checked", state.cd)
+                    return
+                }
+                parent.api.hack_cooldown(!state.cd).then((res) => {
+                    const str = !state.cd ? "开启" : "关闭"
+                    messageplugin({
+                        message: res ? str + "无CD成功" : str + "无CD失败",
+                        type: res ? "success" : "error"
+                    })
+                    if (res) {
+                        state.cd = !state.cd
+                    } else {
+                        $("#cd").attr("checked", state.cd)
+                    }
+                })
+            })
+        }
+        parent.addEventListener('pywebviewready', init_func)
+        if (parent.api) {
+            init_func()
+        }
+
+    </script>
+
+
+
+</body>
+
+</html>

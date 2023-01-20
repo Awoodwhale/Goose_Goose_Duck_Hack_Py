@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="zh-ch">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Goose Goose Duck Map</title>
+    <link rel="stylesheet" href="./layui/css/layui.css">
+    <link rel="stylesheet" href="./css/style.css">
+</head>
+
+<body>
+    <script src="./layui/layui.js"></script>
+    <script src="./js/main.js"></script>
+
+    <div>
+        <button type="button" id="select_map" class="layui-btn layui-btn-xs">
+            切换地图
+            <i class="layui-icon layui-icon-down layui-font-12"></i>
+        </button>
+        <button type="button" id="refresh_map" class="layui-btn layui-btn-xs">刷新数据</button>
+    </div>
+    <div style="width:100%">
+        <div style="margin:0 auto;width:640px;height:480px;">
+            <canvas style="border-radius: 8px;" id="mycan" width="640" height="480">
+            </canvas>
+        </div>
+
+        <img id="tmp_img" style="display: none;" src="./maps/0.png" alt="">
+    </div>
+
+    <script>
+        let cur_map_name = "0"
+        const $ = layui.$
+
+        layui.use('dropdown', () => {
+            const dropdown = layui.dropdown
+            dropdown.render({
+                elem: '#select_map'
+                , data: [
+                    { title: "地下室", id: 0, },
+                    { type: '-' },
+                    { title: "古代沙地", id: 1 },
+                    { type: '-' },
+                    { title: "丛林神殿", id: 2 },
+                    { type: '-' },
+                    { title: "鹅教堂", id: 3 },
+                    { type: '-' },
+                    { title: "马拉德庄园", id: 4 },
+                    { type: '-' },
+                    { title: "连结殖民地", id: 5 },
+                    { type: '-' },
+                    { title: "黑天鹅", id: 6 },
+                    { type: '-' },
+                    { title: "老妈鹅星球飞船", id: 7 },
+                ]
+                , id: "select_map"
+                , click: (obj) => {
+                    cur_map_name = obj.id + ""
+                    const tmp_img = document.getElementById("tmp_img")
+                    tmp_img.src = "./maps/" + cur_map_name + ".png"
+                    draw_game_map()
+                }
+            })
+        })
+
+        const getRad = (degree) => {
+            return degree / 180 * Math.PI;
+        }
+
+        // 合理化canvas坐标
+        const windowToCanvas = (canvas, x, y) => {
+            const canvasBox = canvas.getBoundingClientRect()
+            return [
+                1 + x + document.body.scrollLeft - document.body.clientLeft - canvas.offsetLeft,
+                1 + y + document.body.scrollTop - document.body.clientTop - canvas.offsetTop
+            ]
+        }
+        // 初始化canvas坐标
+        const init_canvas_xy = (ctx) => {
+            ctx.translate(0, 480);
+            ctx.rotate(getRad(180));
+            ctx.scale(-1, 1);
+        }
+
+        // 图片的offsets信息
+        const maps_offsets = {
+            "0": {  // 地下室
+                "scale": 8.088,
+                "start_x": 370,
+                "start_y": 200,
+            },
+            "1": {  // 古代沙地
+                "scale": 7.364,
+                "start_x": 380,
+                "start_y": 210,
+            },
+            "2": {  // 丛林神殿 (tp存在问题)
+                "scale": 7.504,
+                "start_x": 300,
+                "start_y": 300,
+            },
+            "3": {  // 鹅教堂
+                "scale": 7.388,
+                "start_x": 280,
+                "start_y": 310
+            },
+            "4": {  // 马拉德庄园
+                "scale": 8.632,
+                "start_x": 250,
+                "start_y": 380
+            },
+            "5": {  // 连结殖民地
+                "scale": 5.525,
+                "start_x": 380,
+                "start_y": 250
+            },
+            "6": {  // 黑天鹅
+                "scale": 5.063,
+                "start_x": 365,
+                "start_y": 255
+            },
+            "7": {  // 老妈鹅星球飞船
+                "scale": 5.244,
+                "start_x": 375,
+                "start_y": 155
+            },
+        }
+        // 图片缩放比
+        const scale = 0.625
+
+        // 通过游戏坐标获取地图偏移坐标
+        const calc_canvas_xy = (map, x, y) => {
+            const start_x = maps_offsets[map]["start_x"]
+            const start_y = maps_offsets[map]["start_y"]
+            const scale = maps_offsets[map]["scale"]
+            x = parseInt(x * scale + start_x)
+            y = parseInt(y * scale + start_y)
+            return [x, y]
+        }
+
+        // 通过canvas坐标倒推游戏坐标
+        const calc_game_xy = (map, x, y) => {
+            const start_x = maps_offsets[map]["start_x"]
+            const start_y = maps_offsets[map]["start_y"]
+            const scale = maps_offsets[map]["scale"]
+            x = (x - start_x) / scale
+            y = (y - start_y) / scale
+            return [x, y]
+        }
+
+        // 画原始图片
+        const draw_original_img = (ctx, img) => {
+            ctx.save();
+            ctx.translate(0, 480)
+            ctx.rotate(getRad(180))
+            ctx.scale(-1, 1)
+            ctx.drawImage(img, 0, 0, img.width, img.height, 0, 0, img.width * scale, img.height * scale)
+            ctx.restore();
+        }
+    </script>
+    <script>
+        const img = document.getElementById("tmp_img")
+        const mycan = document.getElementById("mycan")
+        const ctx = mycan.getContext('2d')
+        init_canvas_xy(ctx)
+        // 玩家类, 一个玩家在canvas上是一个点
+        class Player {
+            constructor() {
+                this.x = 0
+                this.y = 0
+                this.r = 5
+                this.color = "#0cd80f"  // TODO: 自定义玩家圆点颜色
+                this.nickname = ""
+            }
+            draw() {
+                ctx.save()
+                ctx.beginPath()
+                ctx.fillStyle = this.color
+                ctx.arc(this.x, this.y, this.r, 0, 2 * Math.PI, false) // 画圆点
+                ctx.fill()
+                ctx.translate(this.x + 5, this.y + 5)   // 画名字位置
+                ctx.rotate(getRad(180))
+                ctx.scale(-1, 1)
+                ctx.font = "14px Arial";
+                ctx.fillStyle = this.color
+                ctx.fillText(this.nickname, 0, 0);
+                ctx.restore()
+            }
+            update_xy(x, y) {
+                this.x = x
+                this.y = y
+            }
+            update_nickname(name) {
+                this.nickname = name
+            }
+        }
+
+        let update_map_interval = undefined // 触发器函数
+        const players_arr = []  // 16个玩家
+        for (let i = 0; i < 16; i++) {
+            players_arr.push(new Player())
+        }
+        const draw_game_map = async () => {
+            draw_original_img(ctx, img)
+            // 添加canvas点击事件
+            mycan.onmousedown = (event) => {
+                const [x, y] = windowToCanvas(mycan, event.clientX, event.clientY)
+                const [game_x, game_y] = calc_game_xy(cur_map_name, x, 480 - y)
+                parent.api.hack_position([game_x, game_y]).then((res) => {
+                    if (!res) {
+                        // 传送出问题了再通知
+                        messageplugin({
+                            message: "传送失败",
+                            type: "error"
+                        })
+                    }
+                }).catch((res) => { })
+            }
+            if (!await parent.api.is_game_process_open()) {
+                game_not_start()
+                return
+            }
+            const update_map = async () => {
+                parent.api.get_players_info().then((infos) => {
+                    draw_original_img(ctx, img)
+                    for (let i = 0; i < infos.length; i++) {
+                        const info = infos[i]
+                        if (info === "{}") continue
+                        const json_info = JSON.parse(info)
+                        const nickname = json_info["nickname"]
+                        const is_ghost = json_info["b_isGhost"] // 是否是鬼魂
+                        // nickname为空或者是鬼魂就不画
+                        if (nickname === "" || is_ghost) continue
+                        // console.log(json_info)
+                        const player = players_arr[i]
+                        player.update_nickname(nickname)
+                        const [game_x, game_y, game_z] = json_info["v3_position"]
+                        const [canvas_x, canvas_y] = calc_canvas_xy(cur_map_name, game_x, game_y)
+                        player.update_xy(canvas_x, canvas_y)
+                        player.draw()
+                    }
+                }).catch(() => {
+                    parent.api.is_game_process_open().then((res) => {
+                        if (!res) {
+                            // 游戏被关了
+                            if (update_map_interval !== undefined) {
+                                console.log("游戏被关闭了, 关闭画图触发器");
+                                clearInterval(update_map_interval)  // 关闭触发器
+                            }
+                            $("#refresh").click()   // 执行刷新
+                        }
+                    })
+                })
+            }
+            if (update_map_interval == undefined) {
+                update_map_interval = setInterval(update_map, 200)    // 200毫秒画一次
+            } else {
+                console.log("没有执行画图")
+            }
+
+        }
+        img.onload = draw_game_map
+        $("#refresh_map").on("click", draw_game_map)
+
+        // mycan.onmousemove = (event) => {
+        //     const [x, y] = windowToCanvas(mycan, event.clientX, event.clientY)
+        //     console.log([x, 480 - y], calc_game_xy(cur_map_name, x, 480 - y));
+        // }
+
+    </script>
+</body>
+
+</html>
