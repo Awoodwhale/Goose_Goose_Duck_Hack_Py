@@ -20,6 +20,8 @@
 
 或者使用命令行cmd进行命令行输入，例如`Goose_Goose_Duck_Hack_Py.exe --help`
 
+如果你不想控制台输出各种错误信息，请使用`Goose_Goose_Duck_Hack_Py.exe --log=False`的方式在cmd或powershell启动！
+
 若不想使用打包好的发行版本也可以使用下面的方式进行安装并在本地运行👇
 
 ## Install
