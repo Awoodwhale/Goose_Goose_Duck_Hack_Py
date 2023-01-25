@@ -183,9 +183,9 @@ class Hack:
         ):
             log(f"Failed to hack kill_cooldown. You are not local player!", "error")
             return False
-        log(
-            f"local_player.player_controller.b_isLocal {local_player.player_controller.b_isLocal}"
-        )
+        # log(
+        #     f"local_player.player_controller.b_isLocal {local_player.player_controller.b_isLocal}"
+        # )
         memory = self.client.memory
 
         addr = (
@@ -211,7 +211,7 @@ class Hack:
         except Exception as e:
             log(f"Failed to hack kill_cooldown. Patch error. {e}")
             return False
-        log("hack success")
+        # log("hack success")
         return True
 
     def tp_hack(self, v2_pos: List[float]) -> bool:

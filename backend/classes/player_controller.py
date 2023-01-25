@@ -94,6 +94,12 @@ class PlayerController:
                 self.i_timeOfDeath = self.memory.mem.read_int(
                     self.address + Offsets.PlayerController.i_timeOfDeath
                 )  # 死亡时间
+                i_playerRoleId_addr = self.memory.mem.read_ulonglong(
+                    self.address + Offsets.PlayerController.ptr_playerRole
+                )
+                self.i_playerRoleId = self.memory.mem.read_int(
+                    i_playerRoleId_addr + 0x10
+                )   # 角色id
                 self.rolename = get_role_name(self.i_playerRoleId)  # 角色名称
 
             return True
@@ -111,7 +117,7 @@ class PlayerController:
             return False
         try:
             nickname = self.memory.mem.read_longlong(
-                self.address + Offsets.PlayerController.fl_nickname
+                self.address + Offsets.PlayerController.ptr_nickname
             )
             first_char = nickname + 0x14
             length = self.memory.mem.read_int(nickname + 0x10)

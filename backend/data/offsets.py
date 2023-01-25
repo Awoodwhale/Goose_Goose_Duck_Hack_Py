@@ -20,44 +20,45 @@ class Offsets:
         ptr_Class: int = 0x0
         ptr_Rigidbody2D: int = 0x58
         # Rigidbody2D
-        ptr_bodyCollider: int = 0xA8
+        ptr_bodyCollider: int = 0xB0
         # CapsuleCollider2D
-        b_isSilenced: int = 0xC1
+        b_isSilenced: int = 0xD1
+        b_isHelium: int = 0xD2
         # Boolean
-        b_isInfected: int = 0xC3
+        b_isInfected: int = 0xD3
         # Boolean
-        killedBy: int = 0xC8
+        ptr_killedBy : int = 0xD8
         # point64_ter, [instance+killedBy] +  0x14, length: [instance+killedBy] + 0x10
-        fl_playerRoleId: int = 0xE8
+        ptr_playerRole : int = 0xF8
         # point64_ter, [instance+playerRoleId] + 0x10, int64_t
-        b_isPlayerRoleSet: int = 0xF0
+        b_isPlayerRoleSet: int = 0x100
         # Boolean
-        b_inVent: int = 0xF1
+        b_inVent: int = 0x101
         # Boolean
-        b_facingRight: int = 0x130
+        b_facingRight: int = 0x140
         # Boolean, can make "Moon walk".
-        b_hasBomb: int = 0x134
+        b_hasBomb: int = 0x144
         # Boolean
-        b_isGhost: int = 0x188
+        b_isGhost: int = 0x198
         # Boolean
-        i_timeOfDeath: int = 0x18C
+        i_timeOfDeath: int = 0x19C
         # int
-        b_isLocal: int = 0x1C0
+        b_isLocal: int = 0x1D0
         # Boolean
-        fl_nickname: int = 0x1D0
+        ptr_nickname: int = 0x1E0
         # point64_ter, [instance+nickname] +  0x14, length: [instance+nickname] + 0x10
-        v3_position: int = 0x2C8
+        v3_position: int = 0x2D8
         # Value name is randomized. x, y. Float, Float
-        f_idleTime: int = 0x2E4
+        f_idleTime: int = 0x2F4
         # float
-        b_hasKilledThisRound: int = 0x2EC
+        b_hasKilledThisRound: int = 0x2FC
         # Boolean
-        fl_invisibilityDistance: int = 0x32C
+        fl_invisibilityDistance: int = 0x33C
         # int64_t, need this?
-        b_fogOfWarEnabled: int = 0x379
-        b_isSpectator: int = 0x37A
+        b_fogOfWarEnabled: int = 0x389
+        b_isSpectator: int = 0x38A
         # Boolean
-        b_isRemoteSpectating: int = 0x37B
+        b_isRemoteSpectating: int = 0x38B
         # Boolean
 
     class LocalPlayer:
@@ -95,9 +96,9 @@ class Offsets:
 
 
 # Const
-GameAssembly_Method_UICooldownButton_Update = 0xF2D770
-GameAssembly_Class_ptr_PlayerControllerClass = 0x3CA6AC0
-GameAssembly_Class_ptr_LocalPlayerClass = 0x3C79808
+GameAssembly_Method_UICooldownButton_Update = 0x1163A20
+GameAssembly_Class_ptr_PlayerControllerClass = 0x3C98478
+GameAssembly_Class_ptr_LocalPlayerClass = 0x3C6B510
 
 
 class GameAssembly:
