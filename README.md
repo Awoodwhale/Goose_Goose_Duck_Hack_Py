@@ -14,7 +14,7 @@
 在此感谢[Liuhaixv](https://github.com/Liuhaixv)的项目[Liuhaixv's Goose_Goose_Duck_Hack](https://github.com/Liuhaixv/Goose_Goose_Duck_Hack/)，本项目是基于该项目的c++代码编写的Python版本。
 
 ## TODO
-
+- 版本大更新了，很多功能失效，有时间会修复！
 - 已经更新最新的offsets，但是穿墙可能存在问题
 - 编写自动完成任务的hook
 - 添加快捷键
