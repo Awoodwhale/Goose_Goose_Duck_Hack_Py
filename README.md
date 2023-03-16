@@ -8,6 +8,7 @@
 > 内存操作使用[pymem](https://github.com/srounet/Pymem)，GUI界面使用[pywebview](https://github.com/r0x0r/pywebview)。
 
 ## Before All
+由于游戏的大更新外加鄙人学术不精，本项目归档~
 
 本项目**仅用来学习**，若对本项目进行滥用，作者本人不会对此负责！
 
